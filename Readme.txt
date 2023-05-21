@@ -9,6 +9,9 @@ Ok to proceed? (y) y
 
 npm install @reduxjs/toolkit
 
+Install Tailwind CSS with Vite
+https://tailwindcss.com/docs/guides/vite
+
 npm install -D tailwindcss postcss autoprefixer
 
 npx tailwindcss init -p
