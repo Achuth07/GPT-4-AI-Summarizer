@@ -32,3 +32,16 @@ export default {
   },
   plugins: [],
 }
+
+Run the Application
+-------------------
+
+npm run dev
+
+Hero.jsx
+--------
+Contains the heaading, description and the logo.
+
+Demo.jsx
+--------
+Conains the summarizer input bar and functinality.
