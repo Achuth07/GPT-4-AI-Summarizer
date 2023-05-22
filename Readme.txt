@@ -1,3 +1,7 @@
+Project is build with Vite
+--------------------------
+More info: https://vitejs.dev/guide/
+
 npm create vite@latest
 Need to install the following packages:
   create-vite@4.3.1
@@ -7,9 +11,12 @@ Ok to proceed? (y) y
 √ Select a framework: » React
 √ Select a variant: » JavaScript
 
+Install Redux Toolkit
+---------------------
 npm install @reduxjs/toolkit
 
 Install Tailwind CSS with Vite
+------------------------------
 https://tailwindcss.com/docs/guides/vite
 
 npm install -D tailwindcss postcss autoprefixer
@@ -33,16 +40,17 @@ export default {
   plugins: [],
 }
 
+Install react-redux
+--------------------
 npm install react-redux
 
 Run the Application
 -------------------
-
 npm run dev
 
 Hero.jsx
 --------
-Contains the heaading, description and the logo.
+Contains the heading, description and the logo.
 
 Demo.jsx
 --------
@@ -55,3 +63,5 @@ npm run build
 Host the app online
 ------------------
 app.netlify.com
+
+App hosted at : https://deft-platypus-6c4687.netlify.app/
