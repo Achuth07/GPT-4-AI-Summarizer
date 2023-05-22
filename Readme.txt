@@ -33,6 +33,8 @@ export default {
   plugins: [],
 }
 
+npm install react-redux
+
 Run the Application
 -------------------
 
@@ -45,3 +47,11 @@ Contains the heaading, description and the logo.
 Demo.jsx
 --------
 Conains the summarizer input bar and functinality.
+
+Build for production
+---------------------
+npm run build
+
+Host the app online
+------------------
+app.netlify.com

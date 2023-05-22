@@ -18,7 +18,8 @@ const Hero = () => {
 
       <h1 className='head_text'>
         Summarize Articles with <br className='max-md:hidden'/>
-        <span className='orange_gradient'>GPT-4</span>
+        <span className='blue_gradient'>GPT-4 Powered</span> <br className='max-md:hidden'/>
+        <span className='orange_gradient'>AI-Summarizr</span>
       </h1>
       <h2 className='desc'>
         Summarize any articles or PDF with one-click using the AI Summarizer
