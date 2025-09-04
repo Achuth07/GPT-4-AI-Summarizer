@@ -1,21 +1,22 @@
-import Hero from './components/Hero';
-import Demo from './components/Demo';
-
-import './App.css'
+import { Provider } from 'react-redux';
+import { store } from './store';
+import Home from './pages/Home';
+import './App.css';
 
 const App = () => {
   return (
-    <main>
-      <div className='main'>
-        <div className='gradient' />
-      </div>
+    <Provider store={store}>
+      <main>
+        <div className='main'>
+          <div className='gradient' />
+        </div>
 
-      <div className='app'>
-        <Hero />
-        <Demo />
-      </div>
-    </main>
-  )
-} 
+        <div className='app'>
+          <Home />
+        </div>
+      </main>
+    </Provider>
+  );
+};
 
-export default App
+export default App;

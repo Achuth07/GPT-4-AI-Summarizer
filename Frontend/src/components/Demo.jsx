@@ -25,6 +25,7 @@ const Demo = () => {
     }
   }, []);
 
+  /*
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -45,6 +46,31 @@ const Demo = () => {
       localStorage.setItem("articles", JSON.stringify(updatedAllArticles));
     }
   };
+  */
+
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const existingArticle = allArticles.find(
+    (item) => item.url === article.url
+  );
+
+  if (existingArticle) return setArticle(existingArticle);
+
+  // For URL summarization, we can keep the original RapidAPI integration
+  const { data } = await getSummary({ articleUrl: article.url });
+  if (data?.summary) {
+    const newArticle = { ...article, summary: data.summary };
+    const updatedAllArticles = [newArticle, ...allArticles];
+
+    setArticle(newArticle);
+    setAllArticles(updatedAllArticles);
+    localStorage.setItem("articles", JSON.stringify(updatedAllArticles));
+  }
+};
+
+
 
   // copy the url and toggle the icon for user feedback
   const handleCopy = (copyUrl) => {
