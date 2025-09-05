@@ -7,7 +7,8 @@ import {
   updateArticle,
   deleteArticle,
   retryProcessing,
-  searchArticles
+  searchArticles,
+  summarizeUrl,
 } from "../controllers/articleController.js";
 
 const router = express.Router();
@@ -72,6 +73,7 @@ router.get("/:id", getArticleById);
 router.put("/:id", updateArticle);
 router.delete("/:id", deleteArticle);
 router.post("/:id/retry", retryProcessing);
+router.post("/summarize-url", summarizeUrl);
 
 // Add multer error handling middleware
 router.post("/upload", upload.single("file"), handleMulterError, uploadArticle);

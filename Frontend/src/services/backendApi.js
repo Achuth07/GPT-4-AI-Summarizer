@@ -71,6 +71,16 @@ export const backendApi = createApi({
       }),
       invalidatesTags: (result, error, id) => [{ type: 'Article', id }],
     }),
+
+    //Summarize from URL
+    summarizeUrl: builder.mutation({
+      query: (url) => ({
+        url: 'articles/summarize-url',
+        method: 'POST',
+        body: { url },
+      }),
+      invalidatesTags: ['Article'],
+    }),
   }),
 });
 
@@ -82,4 +92,5 @@ export const {
   useUpdateArticleMutation,
   useDeleteArticleMutation,
   useRetryProcessingMutation,
+  useSummarizeUrlMutation,
 } = backendApi;

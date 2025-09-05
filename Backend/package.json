@@ -13,12 +13,14 @@
   "license": "ISC",
   "dependencies": {
     "canvas": "^3.2.0",
+    "cheerio": "^1.1.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "express-async-handler": "^1.2.0",
     "mongoose": "^8.18.0",
     "multer": "^2.0.2",
+    "node-fetch": "^3.3.2",
     "openai": "^4.28.0",
     "pdfjs-dist": "^3.11.174"
   },

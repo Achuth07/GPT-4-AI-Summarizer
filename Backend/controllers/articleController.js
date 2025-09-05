@@ -8,6 +8,9 @@ import { extractMetadataAndSummarize as mockExtract } from "../services/mockOpen
 import { extractBasicMetadata } from "../services/pdfMetadataService.js";
 import pdfjs from 'pdfjs-dist/legacy/build/pdf.js';
 
+import fetch from 'node-fetch';
+import * as cheerio from 'cheerio';
+
 // @desc    Upload and process PDF
 // @route   POST /api/articles/upload
 // @access  Public
@@ -279,6 +282,90 @@ const deleteArticle = asyncHandler(async (req, res) => {
   res.json({ message: "Article removed successfully" });
 });
 
+// @desc    Summarize article from URL
+// @route   POST /api/articles/summarize-url
+// @access  Public
+
+// Enhanced summarizeUrl function with better HTML parsing
+const summarizeUrl = asyncHandler(async (req, res) => {
+  const { url } = req.body;
+
+  if (!url) {
+    return res.status(400).json({
+      success: false,
+      error: "URL is required"
+    });
+  }
+
+  try {
+    // Fetch the HTML content
+    const response = await fetch(url);
+    const html = await response.text();
+    
+    // Use cheerio to parse HTML and extract meaningful content
+    const $ = cheerio.load(html);
+    
+    // Remove unwanted elements
+    $('script, style, nav, footer, header, aside').remove();
+    
+    // Get the main content
+    const title = $('title').text() || getTitleFromUrl(url);
+    const paragraphs = $('p').map((i, el) => $(el).text()).get();
+    const text = paragraphs.join(' ').substring(0, 10000); // Limit text length
+    
+    // Use the same OpenAI service to summarize the text
+    const extractMetadataAndSummarize = process.env.NODE_ENV === 'production' 
+      ? realExtract 
+      : mockExtract;
+    
+    const { metadata, summary } = await extractMetadataAndSummarize(text);
+    
+    // Create article record
+    const article = await Article.create({
+      title: title,
+      authors: metadata.authors,
+      publicationYear: metadata.publicationYear,
+      journal: metadata.journal || getDomainFromUrl(url),
+      source: url,
+      originalText: text.substring(0, 1000) + '...', // Store first 1000 chars
+      summary,
+      processingStatus: "completed",
+    });
+
+    res.json({
+      success: true,
+      article
+    });
+
+  } catch (error) {
+    console.error("URL summarization error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to summarize URL: " + error.message
+    });
+  }
+});
+
+// Helper function to get domain from URL
+const getDomainFromUrl = (url) => {
+  try {
+    const domain = new URL(url).hostname;
+    return domain.replace('www.', '');
+  } catch (error) {
+    return 'Website';
+  }
+};
+
+// Helper function to extract title from URL
+const getTitleFromUrl = (url) => {
+  try {
+    const domain = new URL(url).hostname;
+    return domain.replace('www.', '').replace('.com', '');
+  } catch (error) {
+    return 'Web Article';
+  }
+};
+
 export {
   uploadArticle,
   getArticles,
@@ -286,5 +373,6 @@ export {
   updateArticle,
   deleteArticle,
   retryProcessing,
-  searchArticles
+  searchArticles,
+  summarizeUrl
 };

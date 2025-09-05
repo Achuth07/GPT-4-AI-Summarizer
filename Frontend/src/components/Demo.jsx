@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
 
 import { copy, linkIcon, loader, tick } from "../assets";
-import { useLazyGetSummaryQuery } from "../services/article";
+import { useSummarizeUrlMutation } from "../services/backendApi";
 
 const Demo = () => {
   const [article, setArticle] = useState({
     url: "",
-    summary: "",
+    summary: null, // Changed from empty string to null
   });
   const [allArticles, setAllArticles] = useState([]);
   const [copied, setCopied] = useState("");
 
-  // RTK lazy query
-  const [getSummary, { error, isFetching }] = useLazyGetSummaryQuery();
+  // Use the backend instead of RapidAPI
+  const [summarizeUrl, { error, isLoading }] = useSummarizeUrlMutation();
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -34,15 +34,21 @@ const Demo = () => {
 
     if (existingArticle) return setArticle(existingArticle);
 
-    // For URL summarization, we can keep the original RapidAPI integration
-    const { data } = await getSummary({ articleUrl: article.url });
-    if (data?.summary) {
-      const newArticle = { ...article, summary: data.summary };
-      const updatedAllArticles = [newArticle, ...allArticles];
+    try {
+      const { data } = await summarizeUrl(article.url);
+      if (data?.article) {
+        const newArticle = { 
+          url: article.url, 
+          summary: data.article.summary 
+        };
+        const updatedAllArticles = [newArticle, ...allArticles];
 
-      setArticle(newArticle);
-      setAllArticles(updatedAllArticles);
-      localStorage.setItem("articles", JSON.stringify(updatedAllArticles));
+        setArticle(newArticle);
+        setAllArticles(updatedAllArticles);
+        localStorage.setItem("articles", JSON.stringify(updatedAllArticles));
+      }
+    } catch (err) {
+      console.error("Summarization error:", err);
     }
   };
 
@@ -57,6 +63,73 @@ const Demo = () => {
     if (e.keyCode === 13) {
       handleSubmit(e);
     }
+  };
+
+  // Helper function to render the structured summary
+  const renderSummary = (summary) => {
+    if (!summary) return null;
+    
+    return (
+      <div className='flex flex-col gap-4'>
+        <h2 className='font-satoshi font-bold text-gray-600 text-xl'>
+          Article <span className='blue_gradient'>Summary</span>
+        </h2>
+        
+        {summary.abstract && (
+          <div className="summary-section">
+            <h3 className="font-semibold text-gray-800 mb-2">Abstract</h3>
+            <p className='font-inter font-medium text-sm text-gray-700'>
+              {summary.abstract}
+            </p>
+          </div>
+        )}
+        
+        {summary.methodology && (
+          <div className="summary-section">
+            <h3 className="font-semibold text-gray-800 mb-2">Methodology</h3>
+            <p className='font-inter font-medium text-sm text-gray-700'>
+              {summary.methodology}
+            </p>
+          </div>
+        )}
+        
+        {summary.keyFindings && (
+          <div className="summary-section">
+            <h3 className="font-semibold text-gray-800 mb-2">Key Findings</h3>
+            <p className='font-inter font-medium text-sm text-gray-700'>
+              {summary.keyFindings}
+            </p>
+          </div>
+        )}
+        
+        {summary.proposedWayForward && (
+          <div className="summary-section">
+            <h3 className="font-semibold text-gray-800 mb-2">Proposed Way Forward</h3>
+            <p className='font-inter font-medium text-sm text-gray-700'>
+              {summary.proposedWayForward}
+            </p>
+          </div>
+        )}
+        
+        {summary.additionalInsights && (
+          <div className="summary-section">
+            <h3 className="font-semibold text-gray-800 mb-2">Additional Insights</h3>
+            <p className='font-inter font-medium text-sm text-gray-700'>
+              {summary.additionalInsights}
+            </p>
+          </div>
+        )}
+        
+        {summary.overallSummary && (
+          <div className="summary-section">
+            <h3 className="font-semibold text-gray-800 mb-2">Overall Summary</h3>
+            <p className='font-inter font-medium text-sm text-gray-700'>
+              {summary.overallSummary}
+            </p>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -80,11 +153,12 @@ const Demo = () => {
             onChange={(e) => setArticle({ ...article, url: e.target.value })}
             onKeyDown={handleKeyDown}
             required
-            className='url_input peer pl-10' // Added left padding for the icon
+            className='url_input peer pl-10'
           />
           <button
             type='submit'
-            className='submit_btn peer-focus:border-gray-700 peer-focus:text-gray-700'
+            disabled={isLoading}
+            className='submit_btn peer-focus:border-gray-700 peer-focus:text-gray-700 disabled:opacity-50'
           >
             <p>↵</p>
           </button>
@@ -115,29 +189,28 @@ const Demo = () => {
 
       {/* Display Result */}
       <div className='my-10 max-w-full flex justify-center items-center'>
-        {isFetching ? (
+        {isLoading ? (
           <img src={loader} alt='loader' className='w-20 h-20 object-contain' />
         ) : error ? (
-          <p className='font-inter font-bold text-black text-center'>
-            Well, that wasn't supposed to happen...
-            <br />
-            <span className='font-satoshi font-normal text-gray-700'>
-              {error?.data?.error}
-            </span>
-          </p>
+          <div className='text-center'>
+            <p className='font-inter font-bold text-black'>
+              Well, that wasn't supposed to happen...
+            </p>
+            <p className='font-satoshi font-normal text-gray-700 mt-2'>
+              {error?.data?.error || error?.error || 'Unknown error occurred'}
+            </p>
+            {/* Add debug info in development */}
+            {process.env.NODE_ENV === 'development' && (
+              <details className='mt-4 text-xs text-gray-500'>
+                <summary className='cursor-pointer'>Technical details</summary>
+                <pre className='mt-2 p-2 bg-gray-100 rounded overflow-auto'>
+                  {JSON.stringify(error, null, 2)}
+                </pre>
+              </details>
+            )}
+          </div>
         ) : (
-          article.summary && (
-            <div className='flex flex-col gap-3'>
-              <h2 className='font-satoshi font-bold text-gray-600 text-xl'>
-                Article <span className='blue_gradient'>Summary</span>
-              </h2>
-              <div className='summary_box'>
-                <p className='font-inter font-medium text-sm text-gray-700'>
-                  {article.summary}
-                </p>
-              </div>
-            </div>
-          )
+          article.summary && renderSummary(article.summary)
         )}
       </div>
     </section>
