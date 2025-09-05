@@ -12,15 +12,22 @@ import pdfjs from 'pdfjs-dist/legacy/build/pdf.js';
 // @route   POST /api/articles/upload
 // @access  Public
 const uploadArticle = asyncHandler(async (req, res) => {
+    console.log('Upload request received');
   if (!req.file) {
-    res.status(400);
-    throw new Error("No file uploaded");
+    return res.status(400).json({ 
+      success: false,
+      error: "No file uploaded" 
+    });
   }
 
+  console.log('File received:', req.file);
   let pdfDocument = null;
 
   try {
+
+    console.log('Reading file buffer');
     const dataBuffer = fs.readFileSync(req.file.path);
+    console.log('File buffer length:', dataBuffer.length);
     const pdfData = new Uint8Array(dataBuffer);
 
     // Use the correct export structure
@@ -51,6 +58,7 @@ const uploadArticle = asyncHandler(async (req, res) => {
 
     // Send immediate response
     res.status(201).json({
+      success: true,
       message: "File uploaded successfully. Processing started.",
       article
     });
@@ -59,6 +67,8 @@ const uploadArticle = asyncHandler(async (req, res) => {
     processArticle(article._id, fullText);
 
   } catch (error) {
+    console.error("Upload error details:", error);
+    
     // Clean up uploaded file if error occurs
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
@@ -73,8 +83,14 @@ const uploadArticle = asyncHandler(async (req, res) => {
       }
     }
     
-    res.status(500);
-    throw new Error("Error processing PDF: " + error.message);
+    // Send proper error response
+    res.status(500).json({
+    success: false,
+    error: "Error processing PDF",
+    message: error.message,
+    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+  });
+
   }
 });
 
@@ -87,9 +103,8 @@ const processArticle = async (articleId, text) => {
     ? realExtract 
     : mockExtract;
     // Limit text to avoid excessive token usage
-    //const limitedText = text.substring(0, 4000);
-    //const { metadata, summary } = await extractMetadataAndSummarize(limitedText);
-    const { metadata, summary } = await extractMetadataAndSummarize(text);
+    const limitedText = text.substring(0, 4000);
+    const { metadata, summary } = await extractMetadataAndSummarize(limitedText);
     //const { metadata, summary } = await extractMetadataAndSummarize(text);
     
     await Article.findByIdAndUpdate(articleId, {
