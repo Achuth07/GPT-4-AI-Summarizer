@@ -7,6 +7,7 @@ import { extractMetadataAndSummarize as mockExtract } from "../services/mockOpen
 
 import { extractBasicMetadata } from "../services/pdfMetadataService.js";
 import pdfjs from 'pdfjs-dist/legacy/build/pdf.js';
+import cloudinary from '../services/cloudinaryService.js';
 
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
@@ -15,25 +16,39 @@ import * as cheerio from 'cheerio';
 // @route   POST /api/articles/upload
 // @access  Public
 const uploadArticle = asyncHandler(async (req, res) => {
-    console.log('Upload request received');
+  console.log('Upload request received');
+  
   if (!req.file) {
+    console.log('No file uploaded');
     return res.status(400).json({ 
       success: false,
       error: "No file uploaded" 
     });
   }
 
-  console.log('File received:', req.file);
+  console.log('File received from Cloudinary:', {
+    originalname: req.file.originalname,
+    size: req.file.size,
+    path: req.file.path,
+    filename: req.file.filename
+  });
+
   let pdfDocument = null;
 
   try {
-
-    console.log('Reading file buffer');
-    const dataBuffer = fs.readFileSync(req.file.path);
-    console.log('File buffer length:', dataBuffer.length);
+    // Since buffer is not available from Cloudinary storage, download the file
+    console.log('Downloading PDF from Cloudinary for processing...');
+    const response = await fetch(req.file.path);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to download PDF from Cloudinary: ${response.statusText}`);
+    }
+    
+    const arrayBuffer = await response.arrayBuffer();
+    const dataBuffer = Buffer.from(arrayBuffer);
     const pdfData = new Uint8Array(dataBuffer);
 
-    // Use the correct export structure
+    // Process PDF text extraction
     const loadingTask = pdfjs.getDocument({ data: pdfData });
     pdfDocument = await loadingTask.promise;
     let fullText = '';
@@ -45,19 +60,22 @@ const uploadArticle = asyncHandler(async (req, res) => {
       fullText += pageText + '\n';
     }
     
-    // Extract basic metadata first
+    // Extract basic metadata
     const basicMetadata = await extractBasicMetadata(dataBuffer);
 
-    // Create article with pending status and basic metadata
+    // Create article with Cloudinary info
     const article = await Article.create({
       title: req.file.originalname.replace('.pdf', ''),
       authors: basicMetadata.authors,
       publicationYear: basicMetadata.publicationYear,
       journal: basicMetadata.journal,
-      source: req.file.path,
+      source: req.file.path, // Cloudinary URL
+      cloudinaryPublicId: req.file.filename, // Store public_id for deletion
       originalText: fullText,
       processingStatus: "processing",
     });
+
+    console.log('Article created successfully:', article._id);
 
     // Send immediate response
     res.status(201).json({
@@ -70,11 +88,19 @@ const uploadArticle = asyncHandler(async (req, res) => {
     processArticle(article._id, fullText);
 
   } catch (error) {
-    console.error("Upload error details:", error);
+    console.error("Upload error:", error);
     
-    // Clean up uploaded file if error occurs
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
+    // Clean up from Cloudinary if upload was successful but processing failed
+    if (req.file && req.file.filename) {
+      try {
+        console.log('Attempting to delete file from Cloudinary:', req.file.filename);
+        await cloudinary.uploader.destroy(req.file.filename, {
+          resource_type: 'raw'
+        });
+        console.log('Cloudinary file deleted successfully');
+      } catch (deleteError) {
+        console.error("Error cleaning up Cloudinary file:", deleteError);
+      }
     }
     
     // Clean up PDF document if it was created
@@ -86,14 +112,10 @@ const uploadArticle = asyncHandler(async (req, res) => {
       }
     }
     
-    // Send proper error response
     res.status(500).json({
-    success: false,
-    error: "Error processing PDF",
-    message: error.message,
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
-  });
-
+      success: false,
+      error: "Error processing PDF: " + error.message
+    });
   }
 });
 
@@ -273,9 +295,16 @@ const deleteArticle = asyncHandler(async (req, res) => {
     throw new Error("Article not found");
   }
 
-  // Clean up uploaded file
-  if (article.source && fs.existsSync(article.source)) {
-    fs.unlinkSync(article.source);
+  // Clean up file from Cloudinary if it exists
+  if (article.cloudinaryPublicId) {
+    try {
+      await cloudinary.uploader.destroy(article.cloudinaryPublicId, {
+        resource_type: 'raw'
+      });
+    } catch (error) {
+      console.error("Error deleting file from Cloudinary:", error);
+      // Don't throw error here - we still want to delete the DB record
+    }
   }
 
   await Article.findByIdAndDelete(req.params.id);

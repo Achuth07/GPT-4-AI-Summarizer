@@ -1,6 +1,9 @@
+#From the root, create a .env file and add in the following variables
 # .env file should have:
 OPENAI_API_KEY=your_api_key_here
-MONGO_URI=mongodb://localhost:27017/article-summarizer
+MONGO_URI=Your Mongo URI e.g mongodb://localhost:27017/article-summarizer
 PORT=5000
 NODE_ENV=development # or production
 FRONTEND_URL=http://localhost:3000
+CLOUDINARY_URL=Your Cloudinary URL e.g cloudinary://xxxx:xxxxx-cloud-Name
+USE_CLOUDINARY=true

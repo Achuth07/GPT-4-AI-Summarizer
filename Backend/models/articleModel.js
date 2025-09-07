@@ -18,7 +18,11 @@ const articleSchema = new mongoose.Schema(
       default: "",
     },
     source: {
-      type: String, // can be URL or file path
+      type: String, // Cloudinary URL
+    },
+    cloudinaryPublicId: { // To track the deletion process
+      type: String,
+      default: ""
     },
     originalText: {
       type: String,

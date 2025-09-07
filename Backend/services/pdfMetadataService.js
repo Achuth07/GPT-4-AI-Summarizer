@@ -1,12 +1,13 @@
 // Use the legacy build for Node.js
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.js';
+import pdfjs from 'pdfjs-dist/legacy/build/pdf.js';
 
+//Extract basic meta data.
 export const extractBasicMetadata = async (dataBuffer) => {
   try {
     const pdfData = new Uint8Array(dataBuffer);
     
-    // Use the correct export structure
-    const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+    // Use the same method as in the controller
+    const loadingTask = pdfjs.getDocument({ data: pdfData });
     const pdfDocument = await loadingTask.promise;
     
     // Get metadata from the PDF document

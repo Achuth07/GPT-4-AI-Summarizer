@@ -7,6 +7,9 @@ import { errorHandler } from "./middleware/errorMiddleware.js";
 import fs from "fs";
 import path from "path";
 
+//import { testCloudinaryConnection } from './services/cloudinaryService.js';
+
+
 dotenv.config();
 
 const app = express();
@@ -36,6 +39,17 @@ app.get('/api/health', (req, res) => {
 
 // Error handler
 app.use(errorHandler);
+
+//For cloudinary tests
+/*
+testCloudinaryConnection().then(isConnected => {
+  if (!isConnected) {
+    console.error('Cloudinary connection failed. Check environment variables.');
+  } else {
+    console.log('Cloudinary connected successfully');
+  }
+});
+*/
 
 // DB connection
 mongoose.connect(process.env.MONGO_URI)
