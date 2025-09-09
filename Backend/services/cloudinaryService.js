@@ -22,7 +22,7 @@ const storage = new CloudinaryStorage({
   },
 });
 
-// Create and export the upload middleware
+// Upload middleware
 export const uploadMiddleware = multer({ 
   storage: storage,
   limits: {
@@ -39,7 +39,8 @@ export const uploadMiddleware = multer({
   },
 }).single('file');
 
-// Test Cloudinary connection
+// Uncomment to test the Cloudinary connection
+/*
 export const testCloudinaryConnection = async () => {
   try {
     const result = await cloudinary.api.ping();
@@ -50,6 +51,7 @@ export const testCloudinaryConnection = async () => {
     return false;
   }
 };
+*/
 
 // Utility function to delete file from Cloudinary
 export const deleteFromCloudinary = async (publicId) => {

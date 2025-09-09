@@ -14,7 +14,7 @@ import { uploadMiddleware } from "../services/cloudinaryService.js"; // Updated
 
 const router = express.Router();
 
-// Cloudinary Test route
+// Cloudinary Test route. Uncomment to test.
 /*
 router.get("/test-cloudinary", async (req, res) => {
   try {

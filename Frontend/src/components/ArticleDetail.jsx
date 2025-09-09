@@ -63,7 +63,7 @@ const ArticleDetail = ({ article, onBack }) => {
         </div>
       )}
 
-      {/* Debug info */}
+      {/* Debug info. Just for debugging. Uncomment to test */}
       {/*
       {article.summary && (
         <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6'>

@@ -25,7 +25,7 @@ PROPOSED WAY FORWARD: [Describe any recommendations or future work suggested]
 ADDITIONAL INSIGHTS: [Any other relevant information or insights]
 
 Here is the article text:
-${text.substring(0, 12000)} // Limit text to avoid token limits
+${text.substring(0, 6000)} // Limit text to avoid token limits
 `;
 
     const completion = await openai.chat.completions.create({

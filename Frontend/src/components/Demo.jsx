@@ -6,12 +6,12 @@ import { useSummarizeUrlMutation } from "../services/backendApi";
 const Demo = () => {
   const [article, setArticle] = useState({
     url: "",
-    summary: null, // Changed from empty string to null
+    summary: null,
   });
   const [allArticles, setAllArticles] = useState([]);
   const [copied, setCopied] = useState("");
 
-  // Use the backend instead of RapidAPI
+  // Using the backend instead of RapidAPI
   const [summarizeUrl, { error, isLoading }] = useSummarizeUrlMutation();
 
   // Load data from localStorage on mount
@@ -199,7 +199,7 @@ const Demo = () => {
             <p className='font-satoshi font-normal text-gray-700 mt-2'>
               {error?.data?.error || error?.error || 'Unknown error occurred'}
             </p>
-            {/* Add debug info in development */}
+            {/* Some debug info in development */}
             {process.env.NODE_ENV === 'development' && (
               <details className='mt-4 text-xs text-gray-500'>
                 <summary className='cursor-pointer'>Technical details</summary>

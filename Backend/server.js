@@ -40,7 +40,7 @@ app.get('/api/health', (req, res) => {
 // Error handler
 app.use(errorHandler);
 
-//For cloudinary tests
+//For cloudinary tests. Uncomment to test.
 /*
 testCloudinaryConnection().then(isConnected => {
   if (!isConnected) {

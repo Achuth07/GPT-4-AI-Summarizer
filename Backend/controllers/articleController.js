@@ -128,7 +128,7 @@ const processArticle = async (articleId, text) => {
     ? realExtract 
     : mockExtract;
     // Limit text to avoid excessive token usage
-    const limitedText = text.substring(0, 4000);
+    const limitedText = text.substring(0, 6000);
     const { metadata, summary } = await extractMetadataAndSummarize(limitedText);
     //const { metadata, summary } = await extractMetadataAndSummarize(text);
     

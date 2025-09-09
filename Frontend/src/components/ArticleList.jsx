@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   useGetArticlesQuery, 
   useDeleteArticleMutation,
-  useGetArticleByIdQuery // Add this import
+  useGetArticleByIdQuery
 } from '../services/backendApi';
 import ArticleDetail from './ArticleDetail';
 
@@ -85,7 +85,7 @@ const ArticleList = () => {
             ))}
           </div>
 
-          {/* Pagination */}
+          {/* Some Pagination */}
           {data?.totalPages > 1 && (
             <div className='flex justify-center mt-8 gap-2'>
               <button

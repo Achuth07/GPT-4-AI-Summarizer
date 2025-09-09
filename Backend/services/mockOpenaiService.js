@@ -2,7 +2,7 @@ export const extractMetadataAndSummarize = async (text) => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 2000));
   
-  // Mock response based on the text content
+  // Mocking a response for development.
   const mockResponse = {
     metadata: {
       authors: ["J. Logeshwaran", "M. Ramkumar", "T. Kiruthiga", "Sharan Pravin Ravi"],

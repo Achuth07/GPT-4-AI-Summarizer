@@ -1,4 +1,4 @@
-// Use the legacy build for Node.js
+// Using the legacy build for Node.js
 import pdfjs from 'pdfjs-dist/legacy/build/pdf.js';
 
 //Extract basic meta data.
