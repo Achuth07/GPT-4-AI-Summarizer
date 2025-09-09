@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.VITE_BACKEND_URL/'api';
+const API_BASE_URL = 'https://gpt-4-ai-summarizer-backend.onrender.com/api';
 
 export const uploadPdf = async (file) => {
   const formData = new FormData();
